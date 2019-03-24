@@ -8,10 +8,11 @@ import org.openqa.selenium.html5.Location;
 
 import java.sql.*;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 public class Booking {
 
-    public static int newBookingStart(HashMap<String, String> map){
+    public static long newBookingStart(HashMap<String, String> map){
         try {
             sleep(1000);
             Connection connection = DriverManager.getConnection(
@@ -19,25 +20,46 @@ public class Booking {
                     "citymobiluser", "TaxistZnaetKudaEdit0");
             Statement statement = connection.createStatement();
             if (map.get("sms").equals("")) {
-                String query = format("INSERT INTO cityMobilLife.carBooking (id, location, phone, bookingRule, mac) " +
-                        "((SELECT MAX(id) FROM cityMobilLife.carBooking) + 1, "
-                        + map.get("location") + ", "
-                        + map.get("phone") + ", "
-                        + map.get("bookingRule") + ", "
-                        + map.get("mac") + ")");
-                statement.executeQuery(query);
-                connection.commit();
-                query = format("SELECT TOP(1) id FROM cityMobilLife.carBooking WHERE mac = '"+ map.get("mac") +"' ORDER BY uid DESC");
-                ResultSet rs= statement.executeQuery(query);
-                connection.close();
-                if (newBookingGetFirstStep(map))
-                    return rs.getInt(0);
-                else
+                String pquery = format("INSERT INTO cityMobilLife.carBooking (location, phone, bookingRule, mac) VALUE (?,?,?,?)");
+//                String query = format("INSERT INTO cityMobilLife.carBooking (location, phone, bookingRule, mac) VALUE " +
+//                        "('"
+//                        + map.get("location") + "', '"
+//                        + map.get("phone") + "', '"
+//                        + map.get("bookingRule") + "', '"
+//                        + map.get("mac") + "')");
+//                statement.executeUpdate(query);
+                PreparedStatement preparedStatement= connection.prepareStatement(pquery, Statement.RETURN_GENERATED_KEYS);
+                preparedStatement.setString(1,map.get("location"));
+                preparedStatement.setString(2,map.get("phone"));
+                preparedStatement.setString(3,map.get("bookingRule"));
+                preparedStatement.setString(4,map.get("mac"));
+
+//                connection.commit();
+//                query = format("SELECT  MAX(id) FROM cityMobilLife.carBooking WHERE mac = '"+ map.get("mac") +"'");
+//                statement.executeUpdate(query);
+//                ResultSet rs = statement.executeQuery(query);
+//                connection.close();
+                int affectedRows = preparedStatement.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new SQLException("Creating user failed, no rows affected.");
+                }
+
+                if (newBookingGetFirstStep(map)) {
+                    ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                    if(generatedKeys.next()){
+
+                        return generatedKeys.getLong(1);
+                    } else {
+                        return -1;
+                    }
+                }
+                else {
                     return -1;
+                }
             }
             else {
                 String query = format("UPDATE cityMobilLife.carBooking SET sms = '" + map.get("sms")+"' WHERE id = '"+ map.get("id") +"'");
-                statement.executeQuery(query);
+                statement.executeUpdate(query);
                 connection.close();
                 if (newBookingGetSecondStep(map))
                     return 0;
@@ -46,27 +68,30 @@ public class Booking {
             }
         }
         catch (Exception e){
+            e.printStackTrace();
             return -1;
         }
     }
 
     private static boolean newBookingGetFirstStep(HashMap<String, String> map){
         try {
+            TestClass.Android_LaunchApp();
             String location = map.get("location");
             String[] locationArr = location.split(",");
             MobileDriver driver = TestClass.driver;
             Location currLocation = new Location(Double.parseDouble(locationArr[0]), Double.parseDouble(locationArr[1]), 0.0);
             driver.setLocation(currLocation);
 
-            TestClass.Android_LaunchApp();
 
             String phone = map.get("phone");
             MobileElement startButton = (MobileElement) driver.findElementById("ru.citymobil.driver:id/buttonStart");
             startButton.click();
             MobileElement phoneEditBox = (MobileElement) driver.findElementById("ru.citymobil.driver:id/editTextRegisterPhone");
-            phoneEditBox.wait(5);
+            phoneEditBox.click();
+//            driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
             phoneEditBox.setValue(phone);
-
+            MobileElement sendPhoneButton = (MobileElement) driver.findElementById("ru.citymobil.driver:id/buttonRegisterPhone");
+            sendPhoneButton.click();
             return true;
         }
         catch (Exception e){

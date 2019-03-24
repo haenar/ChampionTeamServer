@@ -38,15 +38,25 @@ public class ChampionTeamServer {
 
     static class MyHandlerFront implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
+            BufferedReader br = null;
             if (serviceIsON) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(t.getRequestBody()));
-                HashMap<String, String> map = jsonParse(br.readLine());
-                br.close();
-                int id = Booking.newBookingStart(map);
-                serverResponse("{" + Integer.toString(id)  + "}", t);
-            } else
+                br = new BufferedReader(new InputStreamReader(t.getRequestBody()));
+                HashMap<String, String> map = jsonParse(getStringFromWebhook(br));
+                long id = Booking.newBookingStart(map);
+                serverResponse("{'id':'" + Long.toString(id)  + "'}", t);
+            } else {
                 serverResponseErr("ChampionTeamServer is OFF", t);
+            }
+            br.close();
         }
+    }
+
+    private static String getStringFromWebhook(BufferedReader br) throws IOException {
+        String stringJson = "";
+        while (br.ready()) {
+            stringJson += br.readLine();
+        }
+        return stringJson;
     }
 
 
