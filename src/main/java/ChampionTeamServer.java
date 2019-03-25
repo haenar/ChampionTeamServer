@@ -20,7 +20,7 @@ import static utils.CommonUtils.serverResponseErr;
 public class ChampionTeamServer {
 
     public static boolean serviceIsON = false;
-    private static String version = "1.00";
+    private static String version = "1.01";
     private static Queue<List<String[]>> queue = new LinkedList<List<String[]>>();
 
 
