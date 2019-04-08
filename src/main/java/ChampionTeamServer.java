@@ -26,7 +26,7 @@ public class ChampionTeamServer {
 
 
     public static void main(String[] args) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(1234), 1);
+        HttpServer server = HttpServer.create(new InetSocketAddress(1234), 11);
         server.createContext("/front", new MyHandlerFront());
         server.createContext("/start", new MyHandlerStart());
         server.createContext("/stop", new MyHandlerStop());
@@ -38,17 +38,25 @@ public class ChampionTeamServer {
 
     static class MyHandlerFront implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
+            BufferedReader br = null;
             if (serviceIsON) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(t.getRequestBody()));
-                //HashMap<String, String> map = jsonParse(br.readLine());
-
-                HashMap<String, String> map = null;
-                int id = Booking.newBookingStart(map);
-                serverResponse("{" + Integer.toString(id)  + "}", t);
-                br.close();
-            } else
+                br = new BufferedReader(new InputStreamReader(t.getRequestBody()));
+                HashMap<String, String> map = jsonParse(getStringFromWebhook(br));
+                long id = Booking.newBookingStart(map);
+                serverResponse("{'id':'" + Long.toString(id)  + "'}", t);
+            } else {
                 serverResponseErr("ChampionTeamServer is OFF", t);
+            }
+            br.close();
         }
+    }
+
+    private static String getStringFromWebhook(BufferedReader br) throws IOException {
+        String stringJson = "";
+        while (br.ready()) {
+            stringJson += br.readLine();
+        }
+        return stringJson;
     }
 
 
