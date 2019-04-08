@@ -20,13 +20,13 @@ import static utils.CommonUtils.serverResponseErr;
 public class ChampionTeamServer {
 
     public static boolean serviceIsON = false;
-    private static String version = "1.00";
+    private static String version = "1.01";
     private static Queue<List<String[]>> queue = new LinkedList<List<String[]>>();
 
 
 
     public static void main(String[] args) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(1234), 11);
+        HttpServer server = HttpServer.create(new InetSocketAddress(1234), 1);
         server.createContext("/front", new MyHandlerFront());
         server.createContext("/start", new MyHandlerStart());
         server.createContext("/stop", new MyHandlerStop());
@@ -40,10 +40,12 @@ public class ChampionTeamServer {
         public void handle(HttpExchange t) throws IOException {
             if (serviceIsON) {
                 BufferedReader br = new BufferedReader(new InputStreamReader(t.getRequestBody()));
-                HashMap<String, String> map = jsonParse(br.readLine());
-                br.close();
+                //HashMap<String, String> map = jsonParse(br.readLine());
+
+                HashMap<String, String> map = null;
                 int id = Booking.newBookingStart(map);
                 serverResponse("{" + Integer.toString(id)  + "}", t);
+                br.close();
             } else
                 serverResponseErr("ChampionTeamServer is OFF", t);
         }
