@@ -8,6 +8,7 @@ import org.openqa.selenium.html5.Location;
 
 import java.sql.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Booking {
@@ -106,7 +107,8 @@ public class Booking {
             sendPhoneButton.click();
             MobileElement permissionAllowButton = (MobileElement) driver.findElementById("com.android.packageinstaller:id/permission_allow_button");
             permissionAllowButton.wait(5);
-            permissionAllowButton.click();
+            if (permissionAllowButton.isEnabled())
+                permissionAllowButton.click();
 
             String sms = map.get("sms");
             MobileElement sms0 = (MobileElement) driver.findElementById("ru.citymobil.driver:id/editTextRegisterCode0");
@@ -118,23 +120,32 @@ public class Booking {
             MobileElement sms3 = (MobileElement) driver.findElementById("ru.citymobil.driver:id/editTextRegisterCode3");
             sms3.setValue(sms.substring(3, 4));
 
-            MobileElement parthner = (MobileElement) driver.findElementByXPath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.support.v7.widget.RecyclerView/android.widget.LinearLayout[1]/android.widget.LinearLayout/android.widget.TextView[1]");
-            parthner.click();
+            List<MobileElement> partners = driver.findElementsByXPath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.support.v7.widget.RecyclerView");
+            for (MobileElement partner : partners) {
+                if (partner.getText().contains("Дроботов"))
+                    partner.click();
+            }
 
             MobileElement continueButton = (MobileElement) driver.findElementById("ru.citymobil.driver:id/buttonRegisterPhone");
             continueButton.click();
 
-            MobileElement setCarType = (MobileElement) driver.findElementByXPath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.support.v7.widget.RecyclerView/android.widget.LinearLayout[1]/android.widget.LinearLayout/android.widget.TextView[1]");
-            setCarType.click();
+            List<MobileElement>  сarTypes = driver.findElementsByXPath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.support.v7.widget.RecyclerView/android.widget.LinearLayout[1]/android.widget.LinearLayout");
+            for (MobileElement сarType : сarTypes) {
+                if (сarType.getText().contains("Mercedes"))
+                    сarType.click();
+            }
 
             MobileElement continueButton2 = (MobileElement) driver.findElementByXPath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.Button");
             continueButton2.click();
 
             MobileElement jobType = (MobileElement) driver.findElementById("ru.citymobil.driver:id/skipButton");
-            jobType.click();
+            if (jobType.isEnabled()) jobType.click();
 
-            MobileElement el1 = (MobileElement) driver.findElementById("ru.citymobil.driver:id/buttonPositive");
-            el1.click();
+            MobileElement permissionAllowButton2 = (MobileElement) driver.findElementById("com.android.packageinstaller:id/permission_allow_button");
+            if (permissionAllowButton2.isEnabled()) permissionAllowButton2.click();
+
+            MobileElement geoLocationPermission = (MobileElement) driver.findElementById("ru.citymobil.driver:id/buttonPositive");
+            if (geoLocationPermission.isEnabled()) geoLocationPermission.click();
 
             MobileElement navigateToBooking = (MobileElement) driver.findElementByXPath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.view.ViewGroup/android.widget.RelativeLayout/android.view.ViewGroup/android.widget.LinearLayout[2]/android.widget.HorizontalScrollView/android.widget.LinearLayout/android.support.v7.app.ActionBar.Tab[2]/android.view.ViewGroup/android.widget.RelativeLayout/android.widget.ImageView");
             navigateToBooking.click();
@@ -154,19 +165,18 @@ public class Booking {
 
                 if (firstAdress.getText().toLowerCase().contains("аэропорт") ||
                         secondAdres.getText().toLowerCase().contains("аэропорт")) {
-                 //тут берем заказ
-                 //Проверить существует ли заявка
+
+                    MobileElement bookingSet = (MobileElement) driver.findElementByXPath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.view.ViewGroup/android.widget.RelativeLayout/android.view.ViewGroup/android.support.v4.view.ViewPager/android.view.ViewGroup/android.widget.FrameLayout/android.widget.RelativeLayout/android.widget.FrameLayout/android.widget.RelativeLayout/android.widget.LinearLayout/android.view.ViewGroup/android.view.ViewGroup/android.support.v7.widget.RecyclerView/android.widget.FrameLayout[1]/android.widget.LinearLayout/android.widget.LinearLayout[" + i + "]");
+                    bookingSet.click();
+
+                    MobileElement acceptBookingButton = (MobileElement) driver.findElementById("ru.citymobil.driver:id/buttonOrderAcceptOrder");
+                    if (acceptBookingButton.isEnabled()) acceptBookingButton.click();
+
                     reportAboutNewBooking(map.get("id"));
                     return true;
                 }
             }
-/*
-    Фильтры:
-    MobileElement el8 = (MobileElement) driver.findElementByXPath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.view.ViewGroup/android.widget.RelativeLayout/android.view.ViewGroup/android.support.v4.view.ViewPager/android.view.ViewGroup/android.widget.FrameLayout/android.widget.RelativeLayout/android.widget.FrameLayout/android.widget.RelativeLayout/android.widget.LinearLayout/android.view.ViewGroup/android.view.ViewGroup/android.support.v7.widget.RecyclerView/android.widget.FrameLayout[5]/android.widget.LinearLayout/android.widget.LinearLayout[2]/android.widget.LinearLayout[1]/android.widget.LinearLayout/android.widget.TextView");
-    el8.click();
-
-
-*/
+            
         }
         catch (Exception e){
             return false;
