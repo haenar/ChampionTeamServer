@@ -103,8 +103,7 @@ public class Booking {
     private static boolean newBookingGetSecondStep(HashMap<String, String> map){
         try {
             MobileDriver driver = TestClass.driver;
-            MobileElement sendPhoneButton = (MobileElement) driver.findElementById("ru.citymobil.driver:id/buttonRegisterPhone");
-            sendPhoneButton.click();
+
             MobileElement permissionAllowButton = (MobileElement) driver.findElementById("com.android.packageinstaller:id/permission_allow_button");
             permissionAllowButton.wait(5);
             if (permissionAllowButton.isEnabled())
