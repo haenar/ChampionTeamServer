@@ -1,8 +1,10 @@
 import static java.lang.String.format;
 import static java.lang.Thread.sleep;
 
+import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileDriver;
 import io.appium.java_client.MobileElement;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.html5.Location;
 
 
@@ -77,19 +79,24 @@ public class Booking {
     private static boolean newBookingGetFirstStep(HashMap<String, String> map){
         try {
             TestClass.Android_LaunchApp();
+            MobileDriver driver = TestClass.driver;
+//            MobileElement storeButton = (MobileElement) driver.findElementById("android:id/button1");
+//            if (storeButton.isEnabled()) {
+//                storeButton.click();
+//            }
             String location = map.get("location");
             String[] locationArr = location.split(",");
-            MobileDriver driver = TestClass.driver;
             Location currLocation = new Location(Double.parseDouble(locationArr[0]), Double.parseDouble(locationArr[1]), 0.0);
             driver.setLocation(currLocation);
-
-
+//            ((AppiumDriver) driver).hideKeyboard();
+            Thread.sleep(5000);
+//            driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
             String phone = map.get("phone");
-            MobileElement startButton = (MobileElement) driver.findElementById("ru.citymobil.driver:id/buttonStart");
-            startButton.click();
             MobileElement phoneEditBox = (MobileElement) driver.findElementById("ru.citymobil.driver:id/editTextRegisterPhone");
             phoneEditBox.click();
-//            driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+//            MobileElement startButton = (MobileElement) driver.findElementById("ru.citymobil.driver:id/buttonStart");
+//            startButton.click();
+            driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
             phoneEditBox.setValue(phone);
             MobileElement sendPhoneButton = (MobileElement) driver.findElementById("ru.citymobil.driver:id/buttonRegisterPhone");
             sendPhoneButton.click();
