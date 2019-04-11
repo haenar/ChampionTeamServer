@@ -89,7 +89,7 @@ public class Booking {
             Location currLocation = new Location(Double.parseDouble(locationArr[0]), Double.parseDouble(locationArr[1]), 0.0);
             driver.setLocation(currLocation);
 //            ((AppiumDriver) driver).hideKeyboard();
-            Thread.sleep(5000);
+//            Thread.sleep(5000);
 //            driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
             String phone = map.get("phone");
             MobileElement phoneEditBox = (MobileElement) driver.findElementById("ru.citymobil.driver:id/editTextRegisterPhone");
