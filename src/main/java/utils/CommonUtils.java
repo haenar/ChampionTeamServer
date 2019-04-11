@@ -34,7 +34,7 @@ public class CommonUtils {
             String phone = obj.getString("phone");
             String location = obj.getString("location");
             String currentTime = obj.getString("currentTime");
-            String mac = obj.getString("mac");
+//            String mac = obj.getString("mac");
             String comment = obj.getString("comment");
             Boolean actualFlag = obj.getBoolean("actualFlag");
             Boolean completeFlag = obj.getBoolean("completeFlag");
@@ -43,7 +43,7 @@ public class CommonUtils {
             map.put("phone", phone);
             map.put("location", location);
             map.put("currentTime", currentTime);
-            map.put("mac", mac);
+//            map.put("mac", mac);
             map.put("comment", comment);
             map.put("actualFlag", actualFlag.toString());
             map.put("completeFlag", completeFlag.toString());

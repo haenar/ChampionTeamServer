@@ -23,7 +23,7 @@ public class Booking {
                     "citymobiluser", "TaxistZnaetKudaEdit0");
             Statement statement = connection.createStatement();
             if (map.get("sms").equals("")) {
-                String pquery = format("INSERT INTO cityMobilLife.carBooking (location, phone, bookingRule, mac) VALUE (?,?,?,?)");
+                String pquery = format("INSERT INTO cityMobilLife.carBooking (location, phone, bookingRule) VALUE (?,?,?)");
 //                String query = format("INSERT INTO cityMobilLife.carBooking (location, phone, bookingRule, mac) VALUE " +
 //                        "('"
 //                        + map.get("location") + "', '"
@@ -35,7 +35,7 @@ public class Booking {
                 preparedStatement.setString(1,map.get("location"));
                 preparedStatement.setString(2,map.get("phone"));
                 preparedStatement.setString(3,map.get("bookingRule"));
-                preparedStatement.setString(4,map.get("mac"));
+//                preparedStatement.setString(4,map.get("mac"));
 
 //                connection.commit();
 //                query = format("SELECT  MAX(id) FROM cityMobilLife.carBooking WHERE mac = '"+ map.get("mac") +"'");
