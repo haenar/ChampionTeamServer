@@ -1,10 +1,8 @@
 import static java.lang.String.format;
 import static java.lang.Thread.sleep;
 
-import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileDriver;
 import io.appium.java_client.MobileElement;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.html5.Location;
 
 
@@ -15,42 +13,30 @@ import java.util.concurrent.TimeUnit;
 
 public class Booking {
 
-    public static long newBookingStart(HashMap<String, String> map){
+    public long newBookingStart(HashMap<String, String> map){
         try {
             sleep(1000);
             Connection connection = DriverManager.getConnection(
-                    "jdbc:mysql://213.232.228.186:3306/cityMobilLife",
+                    "jdbc:mysql://194.67.92.65:3306/cityMobilLife",
                     "citymobiluser", "TaxistZnaetKudaEdit0");
             Statement statement = connection.createStatement();
             if (map.get("sms").equals("")) {
                 String pquery = format("INSERT INTO cityMobilLife.carBooking (location, phone, bookingRule) VALUE (?,?,?)");
-//                String query = format("INSERT INTO cityMobilLife.carBooking (location, phone, bookingRule, mac) VALUE " +
-//                        "('"
-//                        + map.get("location") + "', '"
-//                        + map.get("phone") + "', '"
-//                        + map.get("bookingRule") + "', '"
-//                        + map.get("mac") + "')");
-//                statement.executeUpdate(query);
+
                 PreparedStatement preparedStatement= connection.prepareStatement(pquery, Statement.RETURN_GENERATED_KEYS);
                 preparedStatement.setString(1,map.get("location"));
                 preparedStatement.setString(2,map.get("phone"));
                 preparedStatement.setString(3,map.get("bookingRule"));
-//                preparedStatement.setString(4,map.get("mac"));
 
-//                connection.commit();
-//                query = format("SELECT  MAX(id) FROM cityMobilLife.carBooking WHERE mac = '"+ map.get("mac") +"'");
-//                statement.executeUpdate(query);
-//                ResultSet rs = statement.executeQuery(query);
-//                connection.close();
                 int affectedRows = preparedStatement.executeUpdate();
                 if (affectedRows == 0) {
                     throw new SQLException("Creating user failed, no rows affected.");
                 }
+                connection.close();
 
                 if (newBookingGetFirstStep(map)) {
                     ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
                     if(generatedKeys.next()){
-
                         return generatedKeys.getLong(1);
                     } else {
                         return -1;
@@ -76,10 +62,10 @@ public class Booking {
         }
     }
 
-    private static boolean newBookingGetFirstStep(HashMap<String, String> map){
+    private boolean newBookingGetFirstStep(HashMap<String, String> map){
         try {
-            TestClass.Android_LaunchApp();
-            MobileDriver driver = TestClass.driver;
+            MobileCapabilities.Android_LaunchApp();
+            MobileDriver driver = MobileCapabilities.driver;
 //            MobileElement storeButton = (MobileElement) driver.findElementById("android:id/button1");
 //            if (storeButton.isEnabled()) {
 //                storeButton.click();
@@ -107,9 +93,9 @@ public class Booking {
         }
     }
 
-    private static boolean newBookingGetSecondStep(HashMap<String, String> map){
+    private boolean newBookingGetSecondStep(HashMap<String, String> map){
         try {
-            MobileDriver driver = TestClass.driver;
+            MobileDriver driver = MobileCapabilities.driver;
 
             MobileElement permissionAllowButton = (MobileElement) driver.findElementById("com.android.packageinstaller:id/permission_allow_button");
             permissionAllowButton.wait(5);

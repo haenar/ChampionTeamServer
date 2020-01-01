@@ -7,7 +7,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.net.URL;
 
-public class TestClass {
+public class MobileCapabilities {
 
     public static AppiumDriver<WebElement> driver;
     public static DesiredCapabilities cap;

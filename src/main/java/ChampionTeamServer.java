@@ -1,63 +1,68 @@
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import utils.Broker;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.Executors;
 
 import static java.lang.String.format;
+import static java.lang.Thread.sleep;
 import static utils.CommonUtils.jsonParse;
 import static utils.CommonUtils.serverResponse;
-import static utils.CommonUtils.serverResponseErr;
 
 public class ChampionTeamServer {
 
     public static boolean serviceIsON = false;
-    private static String version = "1.01";
-    private static Queue<List<String[]>> queue = new LinkedList<List<String[]>>();
-
+    private static String version = "2.01";
+    private static Broker broker = new Broker();
 
 
     public static void main(String[] args) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(1234), 11);
-        server.createContext("/front", new MyHandlerFront());
+        HttpServer server = HttpServer.create(new InetSocketAddress(1234), 5);
         server.createContext("/start", new MyHandlerStart());
         server.createContext("/stop", new MyHandlerStop());
         server.createContext("/state", new MyHandlerState());
         server.setExecutor(Executors.newCachedThreadPool());
         server.start();
 
-    }
-
-    static class MyHandlerFront implements HttpHandler {
-        public void handle(HttpExchange t) throws IOException {
-            BufferedReader br = null;
-            if (serviceIsON) {
-                br = new BufferedReader(new InputStreamReader(t.getRequestBody()));
-                HashMap<String, String> map = jsonParse(getStringFromWebhook(br));
-                long id = Booking.newBookingStart(map);
-                serverResponse("{'id':'" + Long.toString(id)  + "'}", t);
-            } else {
-                serverResponseErr("ChampionTeamServer is OFF", t);
+        ThreadGroup tg1 = new ThreadGroup("Parent ThreadGroup");
+        while(true) {
+            if (!serviceIsON) continue;
+            String json = broker.getResultsFromChanel("", broker.SERVER);
+            if (!json.equals("")) {
+                Thread tread = new Thread(tg1, "") {
+                    public void run() {
+                        startProcess(json);
+                    }
+                };
+                tread.start();
             }
-            br.close();
+            sleep(100);
         }
     }
 
-    private static String getStringFromWebhook(BufferedReader br) throws IOException {
-        String stringJson = "";
-        while (br.ready()) {
-            stringJson += br.readLine();
+
+    public static void startProcess(String json){
+        HashMap<String, String> map = jsonParse(json);
+        String chanelName = map.get("phone");
+        Booking booking = new Booking();
+        json = "";
+
+        long id = booking.newBookingStart(map);
+        broker.publicToChanel("{'id':'" + id + "'}", map.get("phone"), broker.SERVER);
+
+        while (json.equals("")) {
+            json = broker.getResultsFromChanel(chanelName, broker.SERVER);
         }
-        return stringJson;
+        map = jsonParse(json);
+        id = booking.newBookingStart(map);
+        broker.publicToChanel("{'id':'" + id + "'}", map.get("phone"), broker.SERVER);
+        Thread.currentThread().interrupt();
     }
+
 
 
     static class MyHandlerStart implements HttpHandler {
