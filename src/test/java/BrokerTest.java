@@ -7,7 +7,7 @@ import java.util.Random;
 import static org.testng.Assert.assertEquals;
 
 public class BrokerTest {
-    Broker broker = new Broker();
+    private Broker broker = new Broker();
 
     @Test
     public void  publicMessageToPrivateChanelAndReadOne (){
@@ -28,12 +28,16 @@ public class BrokerTest {
         broker.publicToChanel(payload, "TestChanel", broker.SERVER);
         result = broker.getResultsFromChanel("TestChanel", broker.CLIENT);
 
+        assertEquals(result.equals(payload),
+                true,
+                "Не смогли прочесть приватное сообщение Сервер - Клиент");
+
         payload = "{'message':'test" + new Random().nextInt(1000) + "'}";
         broker.publicToChanel(payload, "TestChanel", broker.CLIENT);
         result = broker.getResultsFromChanel("TestChanel", broker.SERVER);
 
         assertEquals(result.equals(payload),
                 true,
-                "Не смогли прочесть приватное сообщение");
+                "Не смогли прочесть приватное сообщение Клиент - Сервер");
     }
 }

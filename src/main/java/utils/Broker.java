@@ -2,20 +2,29 @@ package utils;
 
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import javax.net.ssl.*;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class Broker{
-    int qos = 1;
+    private int qos = 1;
     public final Boolean SERVER = true;
     public final Boolean CLIENT = false;
     private String topicFromClient = "topicFromClient";
-    private String broker = "tcp://194.67.92.65:1883";
-    final String clientId = "Server_" + UUID.randomUUID().toString();
-    MemoryPersistence persistence = new MemoryPersistence();
+    private String broker = "ssl://194.67.92.65:51883";
+    private final String clientId = "Server_" + UUID.randomUUID().toString();
+    private MemoryPersistence persistence = new MemoryPersistence();
 
+    private String caCrtFile = "src/main/resources/ca.crt";
+    private String clientCrtFilePath = "src/main/resources/client.crt";
+    private String clientKeyFilePath = "src/main/resources/client.key";
+    private String password = "IllusionistAEzenha1m";
+
+    private CommonUtils utils = new CommonUtils();
 
     public String getResultsFromChanel(String chanelID, Boolean serverType) {
         String clientType = clientId;
@@ -26,9 +35,12 @@ public class Broker{
 
         String[] result = new String[1];
         try {
+            SSLSocketFactory ssl = utils.getSocketFactory(caCrtFile, clientCrtFilePath, clientKeyFilePath, password);
             MqttClient client = new MqttClient(broker, clientType, persistence);
+
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
+            connOpts.setSocketFactory(ssl);
             client.connect(connOpts);
             CountDownLatch receivedSignal = new CountDownLatch(100);
             client.subscribe(topic, (top, msg) -> {
@@ -41,10 +53,10 @@ public class Broker{
             }
             catch (Exception e) {
                 System.out.println(e.getMessage());
-            };
+            }
             client.disconnect();
         } catch (MqttException me) {
-            System.out.println("reason " + me.getReasonCode());
+            System.out.println("reasonGet " + me.getReasonCode());
             System.out.println("msg " + me.getMessage());
             System.out.println("loc " + me.getLocalizedMessage());
             System.out.println("cause " + me.getCause());
@@ -64,9 +76,11 @@ public class Broker{
         }
 
         try {
+            SSLSocketFactory ssl = utils.getSocketFactory(caCrtFile, clientCrtFilePath, clientKeyFilePath, password);
             MqttClient client = new MqttClient(broker, clientType, persistence);
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
+            connOpts.setSocketFactory(ssl);
             client.connect(connOpts);
             MqttMessage message = new MqttMessage(payLoad.getBytes());
             message.setQos(qos);
@@ -74,7 +88,7 @@ public class Broker{
             client.publish(topic, message);
             client.disconnect();
         } catch (MqttException me) {
-            System.out.println("reason " + me.getReasonCode());
+            System.out.println("reasonPub " + me.getReasonCode());
             System.out.println("msg " + me.getMessage());
             System.out.println("loc " + me.getLocalizedMessage());
             System.out.println("cause " + me.getCause());
