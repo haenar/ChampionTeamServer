@@ -11,7 +11,7 @@ public class CommonFlowTest {
     private Broker broker = new Broker();
     private String json = "{'phone' : '%s'," +
                             "'location' : '10,10'," +
-                            "'currentTime' : '" + DateTime.now() + "'," +
+                            "'currentTime' : '" + DateTime.now().toString("YYYY-MM-dd HH:mm:ss") + "'," +
                             "'comment' : 'Test Comment'," +
                             "'actualFlag' : true," +
                             "'completeFlag' : false," +
@@ -19,7 +19,7 @@ public class CommonFlowTest {
 
     @Test
     public void startFlow(){
-        String phone = "915-555-55-56";
+        String phone = "+7 915-555-55-00";
         json = format(json, phone);
         broker.publicToChanel(json, "TestChanel", broker.CLIENT);
 

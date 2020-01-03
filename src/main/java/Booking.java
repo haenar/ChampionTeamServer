@@ -21,12 +21,13 @@ public class Booking {
                     "citymobiluser", "TaxistZnaetKudaEdit0");
             Statement statement = connection.createStatement();
 
-            String pquery = format("INSERT INTO cityMobilLife.carBooking (location, phone, comment) VALUE (?,?,?)");
+            String pquery = format("INSERT INTO cityMobilLife.carBooking (location, phone, comment, currentTime) VALUE (?,?,?,?)");
 
             PreparedStatement preparedStatement = connection.prepareStatement(pquery, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, map.get("location"));
             preparedStatement.setString(2, map.get("phone"));
             preparedStatement.setString(3, map.get("comment"));
+            preparedStatement.setString(4, map.get("currentTime"));
 
             int affectedRows = preparedStatement.executeUpdate();
             if (affectedRows == 0) {
