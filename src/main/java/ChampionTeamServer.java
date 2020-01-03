@@ -18,7 +18,8 @@ public class ChampionTeamServer {
     public static boolean serviceIsON = false;
     private static String version = "2.01";
     private static Broker broker = new Broker();
-
+    private static ThreadGroup tg1 = new ThreadGroup("Parent ThreadGroup");
+    private static Booking booking = new Booking();
 
     public static void main(String[] args) throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress(1234), 5);
@@ -28,39 +29,45 @@ public class ChampionTeamServer {
         server.setExecutor(Executors.newCachedThreadPool());
         server.start();
 
-        ThreadGroup tg1 = new ThreadGroup("Parent ThreadGroup");
         while(true) {
             if (!serviceIsON) continue;
-            String json = broker.getResultsFromChanel("", broker.SERVER);
-            if (!json.equals("")) {
-                Thread tread = new Thread(tg1, "") {
-                    public void run() {
-                        startProcess(json);
-                    }
-                };
-                tread.start();
-            }
+            waitNewRequest();
             sleep(100);
         }
     }
 
+    public static void waitNewRequest(){
+        String json = broker.getResultsFromChanel("", broker.SERVER);
+        if (!json.equals("")) {
+            Thread tread = new Thread(tg1, "") {
+                public void run() {
+                    String chanelName = startProcess(json);
+                    bookingStartAfterReceiveSMS(chanelName);
+                    Thread.currentThread().interrupt();
+                }
+            };
+            tread.start();
+        }
+    }
 
-    public static void startProcess(String json){
+
+    public static String startProcess(String json) {
         HashMap<String, String> map = jsonParse(json);
         String chanelName = map.get("phone");
-        Booking booking = new Booking();
-        json = "";
 
         long id = booking.newBookingStart(map);
-        broker.publicToChanel("{'id':'" + id + "'}", map.get("phone"), broker.SERVER);
+        broker.publicToChanel("{'id':'" + id + "'}", chanelName, broker.SERVER);
+        return chanelName;
+    }
 
+    public static void bookingStartAfterReceiveSMS(String chanelName){
+        String json = "";
         while (json.equals("")) {
             json = broker.getResultsFromChanel(chanelName, broker.SERVER);
         }
-        map = jsonParse(json);
-        id = booking.newBookingStart(map);
+        HashMap<String, String> map = jsonParse(json);
+        long id = booking.newBookingContinue(map);
         broker.publicToChanel("{'id':'" + id + "'}", map.get("phone"), broker.SERVER);
-        Thread.currentThread().interrupt();
     }
 
 

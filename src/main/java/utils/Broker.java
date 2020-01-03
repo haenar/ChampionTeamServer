@@ -14,7 +14,7 @@ public class Broker{
     private int qos = 1;
     public final Boolean SERVER = true;
     public final Boolean CLIENT = false;
-    private String topicFromClient = "topicFromClient";
+    public String topicFromClient = "topicFromClient";
     private String broker = "ssl://194.67.92.65:51883";
     private final String clientId = "Server_" + UUID.randomUUID().toString();
     private MemoryPersistence persistence = new MemoryPersistence();

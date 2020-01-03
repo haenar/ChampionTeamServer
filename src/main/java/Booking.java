@@ -20,43 +20,44 @@ public class Booking {
                     "jdbc:mysql://194.67.92.65:3306/cityMobilLife",
                     "citymobiluser", "TaxistZnaetKudaEdit0");
             Statement statement = connection.createStatement();
-            if (map.get("sms").equals("")) {
-                String pquery = format("INSERT INTO cityMobilLife.carBooking (location, phone, bookingRule) VALUE (?,?,?)");
 
-                PreparedStatement preparedStatement= connection.prepareStatement(pquery, Statement.RETURN_GENERATED_KEYS);
-                preparedStatement.setString(1,map.get("location"));
-                preparedStatement.setString(2,map.get("phone"));
-                preparedStatement.setString(3,map.get("bookingRule"));
+            String pquery = format("INSERT INTO cityMobilLife.carBooking (location, phone, comment) VALUE (?,?,?)");
 
-                int affectedRows = preparedStatement.executeUpdate();
-                if (affectedRows == 0) {
-                    throw new SQLException("Creating user failed, no rows affected.");
-                }
-                connection.close();
+            PreparedStatement preparedStatement = connection.prepareStatement(pquery, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, map.get("location"));
+            preparedStatement.setString(2, map.get("phone"));
+            preparedStatement.setString(3, map.get("comment"));
 
-                if (newBookingGetFirstStep(map)) {
-                    ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-                    if(generatedKeys.next()){
-                        return generatedKeys.getLong(1);
-                    } else {
-                        return -1;
-                    }
-                }
-                else {
-                    return -1;
-                }
+            int affectedRows = preparedStatement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Creating user failed, no rows affected.");
             }
-            else {
-                String query = format("UPDATE cityMobilLife.carBooking SET sms = '" + map.get("sms")+"' WHERE id = '"+ map.get("id") +"'");
-                statement.executeUpdate(query);
-                connection.close();
-                if (newBookingGetSecondStep(map))
-                    return 0;
-                else
+            connection.close();
+
+            if (newBookingGetFirstStep(map)) {
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getLong(1);
+                } else {
                     return -1;
+                }
+            } else {
+                return -1;
             }
         }
         catch (Exception e){
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    public long newBookingContinue(HashMap<String, String> map) {
+        try {
+            if (newBookingGetSecondStep(map))
+                return 0;
+            else
+                return -1;
+        } catch (Exception e) {
             e.printStackTrace();
             return -1;
         }
