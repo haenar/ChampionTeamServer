@@ -6,6 +6,7 @@ import utils.Broker;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.concurrent.Executors;
 
 import static java.lang.String.format;
@@ -30,18 +31,28 @@ public class ChampionTeamServer {
         server.start();
 
         while(true) {
+            sleep(500);
             if (!serviceIsON) continue;
             waitNewRequest();
-            sleep(100);
         }
     }
 
     public static void waitNewRequest(){
         String json = broker.getResultsFromChanel("", broker.SERVER);
+        HashMap<String, String> map = jsonParse(json);
+        String chanelName = map.get("phone");
         if (!json.equals("")) {
-            Thread tread = new Thread(tg1, "") {
+            Thread[] threads = new Thread[tg1.activeCount()];
+            tg1.enumerate(threads, true);
+            for (Thread t : threads){
+                if (t.getName().equals("tread_" + chanelName))
+                    return;
+            }
+
+            Thread tread = new Thread(tg1, "tread_" + chanelName) {
                 public void run() {
-                    String chanelName = startProcess(json);
+                    if (startProcess(map) == -1)
+                        return;
                     bookingStartAfterReceiveSMS(chanelName);
                     Thread.currentThread().interrupt();
                 }
@@ -51,13 +62,10 @@ public class ChampionTeamServer {
     }
 
 
-    public static String startProcess(String json) {
-        HashMap<String, String> map = jsonParse(json);
-        String chanelName = map.get("phone");
-
+    public static long startProcess(HashMap<String, String> map) {
         long id = booking.newBookingStart(map);
-        broker.publicToChanel("{'id':'" + id + "'}", chanelName, broker.SERVER);
-        return chanelName;
+        broker.publicToChanel("{'id':'" + id + "'}", map.get("phone"), broker.SERVER);
+        return id;
     }
 
     public static void bookingStartAfterReceiveSMS(String chanelName){
@@ -67,7 +75,7 @@ public class ChampionTeamServer {
         }
         HashMap<String, String> map = jsonParse(json);
         long id = booking.newBookingContinue(map);
-        broker.publicToChanel("{'id':'" + id + "'}", map.get("phone"), broker.SERVER);
+        broker.publicToChanel("{'id':'" + id + "'}", chanelName, broker.SERVER);
     }
 
 
